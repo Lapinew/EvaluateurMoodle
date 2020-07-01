@@ -1,7 +1,17 @@
 package evaluateur;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import java.sql.*;
 import java.util.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class evalProf {
 
@@ -55,8 +65,55 @@ public class evalProf {
 			table.add(ligne);
 		}
 		
+		if (table.isEmpty()) {
+			System.out.println("La requete n'a rien renvoyé, elle comporte surement une erreur");
+			System.exit(1);
+		}
+		
 		System.out.println(table.toString());
 		
+		//Verifie si le .json est vide
+		File exist = new File("test.json");
+		if (exist.length() == 0) { //Si le fichier ne contient pas de liste
+			System.out.println("Le fichier est vide");
+			JSONObject reponse = new JSONObject(); //On crée la premiere réponse de la liste
+			reponse.put(1,table);
+			JSONArray reponses = new JSONArray();//On crée la liste de reponses
+			reponses.add(reponse); //On ajoute la réponse à la liste
+			try (FileWriter file = new FileWriter("test.json")) {
+	            file.write(reponses.toJSONString()); //On met la liste dans le json
+	            file.flush();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+		} else { //Le fichier contient deja une liste
+			JSONParser jsonParser = new JSONParser();
+			try (FileReader reader = new FileReader("test.json"))
+	        {
+	            //Lire fichier json
+	            Object obj = jsonParser.parse(reader);
+	            JSONArray reponses = (JSONArray) obj;
+	            int nb = reponses.size();
+	            System.out.println(reponses);
+	            JSONObject reponse = new JSONObject(); //On crée la premiere réponse de la liste
+				reponse.put(nb+1,table);
+				reponses.add(reponse);
+				try (FileWriter file = new FileWriter("test.json")) {
+		            file.write(reponses.toJSONString()); //On met la liste dans le json
+		            file.flush();
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+	        } catch (FileNotFoundException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        } catch (ParseException e) {
+	            e.printStackTrace();
+	        }
+	    }
+		
+		//System.out.println(System.getProperty("user.dir"));
 	}
 
 }
