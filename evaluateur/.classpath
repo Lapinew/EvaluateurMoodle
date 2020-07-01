@@ -6,12 +6,12 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/tohat/Downloads/ojdbc6.jar">
+	<classpathentry kind="lib" path="D:/ProjetEvaluateur/evaluateur/bin/mysql-connector.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/tohat/Downloads/mysql-connector.jar">
+	<classpathentry kind="lib" path="D:/ProjetEvaluateur/evaluateur/bin/ojdbc6.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
