@@ -1,37 +1,28 @@
 package evaluateur;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import java.sql.*;
-import java.util.*;
-import com.google.gson.*;
 
 public class Evaluateur {
 
 	public static void main(String[] args) throws SQLException {
 		
+		//TO-DO : Fermer les connexion et les resultSet aux endroits nécéssaires
+		
 		//RECUPERATION DES DONNEES EXTERNES NECESSAIRES A L'EXECUTION DU PROGRAMME
-		int numQuestion = 2;
-		boolean enseignant = false; //Recu par moyen X de codeRunner
-		String sgbd = "mySQL"; //Recu par moyen X de codeRunner
-		String requete = "SELECT * FROM trajet WHERE depart = 'orsay'"; //Recu par moyen X de codeRunner
-		String nomTest = "test" + ".json"; //Recu par moyen X de codeRunner + On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
+		int numQuestion = 1; //Pour l'eleve
+		boolean enseignant = false;
+		String sgbd = "mySQL";
+		String requete = "UPDATE trajet SET depart = 'lille' WHERE id_trajet = 4";
+		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
 		
 		//PHASE DE CONNEXION BD
 		Connexion connexion = new Connexion(sgbd);
 		Connection maConnexion = connexion.getConnection();
 		
-		//CONVERSION DU RESULTAT DE LA REQUETE EN TABLEAU 2D/1D
+		//RECUPERATION DU RESULTAT DE LA REQUETE A TRAITER (voir le constructeur de la classe Table)
 		Table objTable = new Table(requete, maConnexion);
-		if (objTable.vide()) {
-			System.out.println("Resultat de la requete vide");
-			System.exit(1);
-		}
 		
+		//TRAITEMENT DE LA TABLE RESULTAT
 		if (enseignant) { //PARTIE ENSEIGNANT
 			objTable.toJSON(nomTest);
 		} else { //PARTIE ELEVE

@@ -18,11 +18,46 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 
 	//Attributs
 	private ArrayList<ArrayList<Object>> table;
-	private boolean vide;
+	private boolean modify;
 	
 	//Constructeurs
-	public Table(String requete, Connection connexion) {
+	public Table(String requete, Connection connexion) { //Construit un array exploitable a partir de du resultat de la requete
 		try {
+			//DETECTION DE LA NATURE DE LA REQUETE
+			String [] splittedRequete = requete.split(" ", 4);
+			String tableSelect = null; //Dans le cas d'une requete modifiante, on récupère la table qui est modifié pour faire un select ensuite
+			switch (splittedRequete[0].toUpperCase()) {
+			  case "SELECT" :
+				  System.out.println("SELECT");
+				  modify = false;
+			    break;
+			  case "UPDATE" :
+				  tableSelect = splittedRequete[1];
+				  System.out.println("UPDATE");
+				  modify = true;
+			    break;
+			  case "DELETE" :
+				  tableSelect = splittedRequete[2];
+				  System.out.println("DELETE");
+				  modify = true;
+			    break;
+			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois 
+				  tableSelect = splittedRequete[2];
+				  System.out.println("INSERT");
+				  modify = true;
+			  default:
+				  System.out.println("Requete invalide");
+				  System.exit(1);
+			}
+			
+			if (modify) { //Si la requete modifie la table, on modifie d'abord, puis on remplace la requete par un select de la table
+				Statement stmtUpdate = connexion.createStatement();
+				stmtUpdate.executeUpdate(requete); //On execute d'abord la requete qui modifie la table
+				stmtUpdate.close();
+				requete = "SELECT * FROM " + tableSelect;
+			}
+			
+			//TRANSFORMATION DU RESULTSET EN ARRAY
 			Statement stmt = connexion.createStatement();
 			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
 			int nbCol = resultat.getMetaData().getColumnCount(); //Recupere nb colonne du resultat de la requete
@@ -36,30 +71,18 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 				}
 				table.add(ligne);
 			}
+			stmt.close();
 			System.out.println("table crée");
 		}
 		catch (SQLException e) {
-			System.out.println("Erreur au niveau de la conversion en table");
+			System.out.println("Erreur lors de la conversion en table");
         	System.exit(1);
-		}
-		
-		if (table.isEmpty()) {
-			vide = true;
-			System.out.println("La table est vide");
-		}
-		else {
-			vide = false;
-			System.out.println("La table contient des données");
 		}
 	}
 	
 	//Methodes
 	public ArrayList<ArrayList<Object>> getTable () {
 		return table;
-	}
-	
-	public boolean vide() {
-		return vide;
 	}
 	
 	public void afficheTable() {
@@ -113,9 +136,6 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 	}
 	
 	public void test(String nomTest) {
-		GsonBuilder builder = new GsonBuilder();
-		Gson gson = builder.create();
-		gson.toJson(table);
 	}
 	
 	public void comparaison(String nomTest, int numQuestion) {
