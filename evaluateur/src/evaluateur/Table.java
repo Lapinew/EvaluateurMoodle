@@ -21,7 +21,7 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 	private boolean modify;
 	
 	//Constructeurs
-	public Table(String requete, Connection connexion) { //Construit un array exploitable a partir de du resultat de la requete
+	public Table(String requete, Connection connexion) { //Construit un array exploitable a partir du resultat de la requete
 		try {
 			//DETECTION DE LA NATURE DE LA REQUETE
 			String [] splittedRequete = requete.split(" ", 4);
