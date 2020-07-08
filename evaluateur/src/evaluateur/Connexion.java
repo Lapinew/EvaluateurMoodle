@@ -15,7 +15,7 @@ public class Connexion { //Cette classe est configurée pour se connecter au BD l
 		switch (sgbd) { //Chargement du driver adapté et connexion au SGBD choisi par l'enseignant sur codeRunner
 		  case "mySQL" :
 			  driver = "com.mysql.jdbc.Driver";
-			  url = "jdbc:mysql://localhost:3306/tpweb";
+			  url = "jdbc:mysql://localhost:3306/testevaluateur";
 			  user = "root";
 			  pwd = "";
 		    break;

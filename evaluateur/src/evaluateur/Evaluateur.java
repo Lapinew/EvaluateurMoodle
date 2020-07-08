@@ -18,7 +18,7 @@ public class Evaluateur {
 		int numQuestion = 1; //Pour l'eleve
 		boolean enseignant = true;
 		String sgbd = "mySQL";
-		String requete = "SELECT * FROM trajet WHERE depart = 'orsay'";
+		String requete = "SELECT * FROM test WHERE age = '40'";
 		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
 		String nomFichier = "createTable"  + ".sql";
 		
@@ -71,8 +71,19 @@ public class Evaluateur {
 		  objTable.comparaison(nomTest, numQuestion); 
 		  }
 		  
+		  //SUPPRESSION DES TABLES POUR MYSQL
+		  Statement offConstraints = maConnexion.createStatement();
+		  offConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
+		  Statement getTables = maConnexion.createStatement();
+		  ResultSet resultat = getTables.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = 'testevaluateur'");
+		  while (resultat.next()) {
+			  Statement delTable = maConnexion.createStatement();
+			  delTable.executeUpdate("DROP TABLE IF EXISTS " + resultat.getString(1));
+		  }
+		  Statement onConstraints = maConnexion.createStatement();
+		  onConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+		  
 		  //System.out.println(System.getProperty("user.dir"));
-		 
 	}
 
 }
