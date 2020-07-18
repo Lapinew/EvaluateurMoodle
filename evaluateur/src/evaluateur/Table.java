@@ -10,75 +10,14 @@ import java.util.ArrayList;
 
 import com.google.gson.*;
 
-public class Table { //Cette classe permet de convertir un ResultSet en un tableau 2D/3D exploitable
+abstract class Table { //Cette classe permet de convertir un ResultSet en un tableau 2D/3D exploitable
 	
 	//CallableStatement : Appel procédure/fonction
 	//PreparedStatement : adapté pour SELECT, INSERT, UPDATE, DELETE (parametres changeables)
 	//Statement : adapté pour CREATE, DROP, ALTER, TRUNCATE et pour le reste si requete FIXE
 
 	//Attributs
-	private ArrayList<ArrayList<Object>> table;
-	private boolean modify;
-	
-	//Constructeurs
-	public Table(String requete, Connection connexion) { //Construit un array exploitable a partir du resultat de la requete
-		try {
-			//DETECTION DE LA NATURE DE LA REQUETE
-			String [] splittedRequete = requete.split(" ", 4);
-			String tableSelect = null; //Dans le cas d'une requete modifiante, on récupère la table qui est modifié pour faire un select ensuite
-			switch (splittedRequete[0].toUpperCase()) {
-			  case "SELECT" :
-				  System.out.println("SELECT");
-				  modify = false;
-			    break;
-			  case "UPDATE" :
-				  tableSelect = splittedRequete[1];
-				  System.out.println("UPDATE");
-				  modify = true;
-			    break;
-			  case "DELETE" :
-				  tableSelect = splittedRequete[2];
-				  System.out.println("DELETE");
-				  modify = true;
-			    break;
-			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois 
-				  tableSelect = splittedRequete[2];
-				  System.out.println("INSERT");
-				  modify = true;
-			  default:
-				  System.out.println("Requete invalide");
-				  System.exit(1);
-			}
-			
-			if (modify) { //Si la requete modifie la table, on modifie d'abord, puis on remplace la requete par un select de la table
-				Statement stmtUpdate = connexion.createStatement();
-				stmtUpdate.executeUpdate(requete); //On execute d'abord la requete qui modifie la table
-				stmtUpdate.close();
-				requete = "SELECT * FROM " + tableSelect;
-			}
-			
-			//TRANSFORMATION DU RESULTSET EN ARRAY
-			Statement stmt = connexion.createStatement();
-			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
-			int nbCol = resultat.getMetaData().getColumnCount(); //Recupere nb colonne du resultat de la requete
-			table = new ArrayList<ArrayList<Object>>();
-			
-			while(resultat.next()) {
-				//Une ligne doit pouvoir stocker différent types car une requete peut renvoyer plusieurs types de données (on utilise donc Object)
-				ArrayList<Object> ligne = new ArrayList<Object>();
-				for (int i = 1; i < nbCol; i++) { //Pour chaque colonne
-					ligne.add(resultat.getString(i)); //On ajoute à la ligne la valeur de la colonne
-				}
-				table.add(ligne);
-			}
-			stmt.close();
-			System.out.println("table crée");
-		}
-		catch (SQLException e) {
-			System.out.println("Erreur lors de la conversion en table");
-        	System.exit(1);
-		}
-	}
+	protected ArrayList<ArrayList<Object>> table;
 	
 	//Methodes
 	public ArrayList<ArrayList<Object>> getTable () {
@@ -91,10 +30,10 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 	
 	private void aLaSuite(String nomTest) {
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> reponses = null;
-		try (FileReader reader = new FileReader(nomTest)) {
-			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList"));
-			reponses.add(table);
+		ArrayList<ArrayList<ArrayList<Object>>> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
+		try (FileReader reader = new FileReader(nomTest)) { //On lit le json
+			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList")); //On récupère les données
+			reponses.add(table); //On ajoute la table qu'on a crée aux données récupérées
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -106,7 +45,7 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		try (FileWriter file = new FileWriter(nomTest)) {
+		try (FileWriter file = new FileWriter(nomTest)) { //On remplace le contenu du json par le nouveau arrayList
 			gson.toJson(reponses, file);
         } catch (IOException e) {
             e.printStackTrace();
@@ -115,9 +54,9 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 	
 	private void premiereTable(String nomTest) {
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> buffer = new ArrayList<ArrayList<ArrayList<Object>>>();
-		buffer.add(table);
-		try (FileWriter file = new FileWriter(nomTest)) {
+		ArrayList<ArrayList<ArrayList<Object>>> buffer = new ArrayList<ArrayList<ArrayList<Object>>>(); //On crée l'arrayList qui va contenir les réponses
+		buffer.add(table); //On met la premiere table dans l'array
+		try (FileWriter file = new FileWriter(nomTest)) { //On met l'array dans le json
 			gson.toJson(buffer, file);
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,14 +74,11 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 	    }
 	}
 	
-	public void test(String nomTest) {
-	}
-	
 	public void comparaison(String nomTest, int numQuestion) {
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> reponses = null;
-		try (FileReader reader = new FileReader(nomTest)) {
-			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList"));
+		ArrayList<ArrayList<ArrayList<Object>>> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
+		try (FileReader reader = new FileReader(nomTest)) { //On lit le json
+			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList")); //Récupère l'array du json
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -154,9 +90,9 @@ public class Table { //Cette classe permet de convertir un ResultSet en un table
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		ArrayList<ArrayList<Object>> buffer = reponses.get(numQuestion-1);
-		System.out.println(buffer);
-		System.out.println(table);
+		ArrayList<ArrayList<Object>> buffer = reponses.get(numQuestion-1); //On récupère la réponse correspondant au numero de la question à laquelle on est
+		System.out.println(buffer); //Affiche la réponse du prof
+		System.out.println(table); //Affiche la réponse de l'élève
 		if (buffer.equals(table)) {
 			System.out.println("Bonne réponse");
 		} else {
