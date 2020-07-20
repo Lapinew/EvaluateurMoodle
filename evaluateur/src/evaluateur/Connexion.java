@@ -1,6 +1,7 @@
 package evaluateur;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class Connexion { //Cette classe est configurée pour se connecter au BD locales
 	
@@ -9,6 +10,7 @@ public class Connexion { //Cette classe est configurée pour se connecter au BD l
 	private String url;
 	private String user;
 	private String pwd;
+	private Connection maConnexion;
 	
 	//Constructeurs
 	public Connexion(String sgbd) {
@@ -32,10 +34,6 @@ public class Connexion { //Cette classe est configurée pour se connecter au BD l
 			  pwd = "";
 		    break;
 		}
-	}
-	
-	//Methodes
-	public Connection getConnection() {
 		try {
             Class.forName(driver);
         }
@@ -45,8 +43,6 @@ public class Connexion { //Cette classe est configurée pour se connecter au BD l
         }
 		System.out.println("Pilote chargé");
 		
-		Connection maConnexion = null;
-		
 		try {
 			maConnexion = DriverManager.getConnection(url,user,pwd);
 		}
@@ -55,8 +51,30 @@ public class Connexion { //Cette classe est configurée pour se connecter au BD l
         	System.exit(1);
 		}
 		System.out.println("Connecté à " + url);
-		
+	}
+	
+	//Methodes
+	public Connection getConnection() {
 		return maConnexion;
+	}
+	
+	public void deleteBD() {
+		try {
+			  Statement offConstraints = maConnexion.createStatement();
+			  offConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
+			  Statement getTables = maConnexion.createStatement();
+			  ResultSet resultat = getTables.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = 'testevaluateur'");
+			  while (resultat.next()) {
+				  Statement delTable = maConnexion.createStatement();
+				  delTable.executeUpdate("DROP TABLE IF EXISTS " + resultat.getString(1));
+			  }
+			  Statement onConstraints = maConnexion.createStatement();
+			  onConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+		}
+		catch (SQLException e) {
+			System.out.println(e);
+	    	System.exit(1);
+		}
 	}
 	
 }

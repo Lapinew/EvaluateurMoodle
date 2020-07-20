@@ -12,6 +12,7 @@ public class Modify extends Table {
 	
 	public Modify(String requete, Connection connexion, String tabSelect) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
+		this.requete = requete;
 		try {
 			//Comme la requete est modifiante on modifie d'abord la table puis on remplace la requete par un select de la table pour voir ce qui a ete modifié
 			Statement stmtUpdate = connexion.createStatement();

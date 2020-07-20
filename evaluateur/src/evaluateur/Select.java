@@ -11,6 +11,7 @@ public class Select extends Table {
 	public Select(String requete, Connection connexion) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
 		try {
+			this.requete = requete;
 			Statement stmt = connexion.createStatement();
 			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
 			int nbCol = resultat.getMetaData().getColumnCount(); //Recupere nb colonne du resultat de la requete

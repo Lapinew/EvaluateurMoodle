@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class Evaluateur {
 	
 	//NE PAS OUBLIER DE FAIRE UN COMPARATIF DES SGBD POUR RENDU FINAL
+	//DETRUIRE LA BD CREE DANS LE CAS OU LA REQUETE ACTUELLEMENT TRAITEE PLANTE
 
 	public static void main(String[] args) throws SQLException {
 		
@@ -18,16 +19,17 @@ public class Evaluateur {
 		int numQuestion = 1; //Pour l'eleve
 		boolean enseignant = false;
 		String sgbd = "mySQL";
-		String requete = "SELECT * FROM test WHERE age = '40'";
+		String requete = "SELECT * FROM test WHERE age > 40";
 		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
 		String nomFichier = "createTable"  + ".sql";
 		
 		//PHASE DE CONNEXION BD
 		Connexion connexion = new Connexion(sgbd);
 		Connection maConnexion = connexion.getConnection();
+		connexion.deleteBD(); //Pansement pour le probleme de destruction de bd
 		
 		//CREATION DE LA TABLE DE TEST A PARTIR D'UN FICHIER .SQL
-		if (enseignant) { //PARTIE ENSEIGNANT
+		if (true) { //PARTIE ENSEIGNANT
 			int c;
 			int back = 0;
 			int cpt = 0;
@@ -94,16 +96,7 @@ public class Evaluateur {
 		  }
 		  
 		  //SUPPRESSION DES TABLES POUR MYSQL
-		  Statement offConstraints = maConnexion.createStatement();
-		  offConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
-		  Statement getTables = maConnexion.createStatement();
-		  ResultSet resultat = getTables.executeQuery("SELECT table_name FROM information_schema.tables WHERE table_schema = 'testevaluateur'");
-		  while (resultat.next()) {
-			  Statement delTable = maConnexion.createStatement();
-			  delTable.executeUpdate("DROP TABLE IF EXISTS " + resultat.getString(1));
-		  }
-		  Statement onConstraints = maConnexion.createStatement();
-		  onConstraints.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
+		  //connexion.deleteBD();
 		  
 		  //System.out.println(System.getProperty("user.dir"));
 	}

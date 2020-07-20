@@ -5,12 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.*;
 import java.util.ArrayList;
+import java.lang.reflect.Type;
 
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 
-abstract class Table { //Cette classe permet de convertir un ResultSet en un tableau 2D/3D exploitable
+public class Table { //Cette classe permet de convertir un ResultSet en un tableau 2D/3D exploitable
 	
 	//CallableStatement : Appel procédure/fonction
 	//PreparedStatement : adapté pour SELECT, INSERT, UPDATE, DELETE (parametres changeables)
@@ -18,6 +19,7 @@ abstract class Table { //Cette classe permet de convertir un ResultSet en un tab
 
 	//Attributs
 	protected ArrayList<ArrayList<Object>> table;
+	protected String requete;
 	
 	//Methodes
 	public ArrayList<ArrayList<Object>> getTable () {
@@ -30,10 +32,10 @@ abstract class Table { //Cette classe permet de convertir un ResultSet en un tab
 	
 	private void aLaSuite(String nomTest) {
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
+		ArrayList<Table> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
 		try (FileReader reader = new FileReader(nomTest)) { //On lit le json
-			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList")); //On récupère les données
-			reponses.add(table); //On ajoute la table qu'on a crée aux données récupérées
+			reponses = (ArrayList<Table>) gson.fromJson(reader, Class.forName("java.util.ArrayList")); //On récupère les données
+			reponses.add(this); //On ajoute la table qu'on a crée aux données récupérées
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -54,8 +56,8 @@ abstract class Table { //Cette classe permet de convertir un ResultSet en un tab
 	
 	private void premiereTable(String nomTest) {
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> buffer = new ArrayList<ArrayList<ArrayList<Object>>>(); //On crée l'arrayList qui va contenir les réponses
-		buffer.add(table); //On met la premiere table dans l'array
+		ArrayList<Table> buffer = new ArrayList<Table>(); //On crée l'arrayList qui va contenir les réponses
+		buffer.add(this); //On met la premiere table dans l'array
 		try (FileWriter file = new FileWriter(nomTest)) { //On met l'array dans le json
 			gson.toJson(buffer, file);
         } catch (IOException e) {
@@ -74,11 +76,13 @@ abstract class Table { //Cette classe permet de convertir un ResultSet en un tab
 	    }
 	}
 	
-	public void comparaison(String nomTest, int numQuestion) {
+	public void comparaison(String nomTest, int numQuestion) { //Methode permettant de comparer la réponse d'un eleve a celle de l'enseignant
 		Gson gson = new Gson();
-		ArrayList<ArrayList<ArrayList<Object>>> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
+		Type listType = new TypeToken<ArrayList<Table>>(){}.getType();
+		ArrayList<Table> reponses = null; //On prepare l'arrayList pour récupérer les données dans le json
 		try (FileReader reader = new FileReader(nomTest)) { //On lit le json
-			reponses = (ArrayList<ArrayList<ArrayList<Object>>>) gson.fromJson(reader, Class.forName("java.util.ArrayList")); //Récupère l'array du json
+			//Class.forName("java.util.ArrayList")
+			reponses = (ArrayList<Table>) gson.fromJson(reader, listType); //Récupère l'array du json
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -87,13 +91,11 @@ abstract class Table { //Cette classe permet de convertir un ResultSet en un tab
 			e.printStackTrace();
 		} catch (JsonIOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		}
-		ArrayList<ArrayList<Object>> buffer = reponses.get(numQuestion-1); //On récupère la réponse correspondant au numero de la question à laquelle on est
-		System.out.println(buffer); //Affiche la réponse du prof
+		Table buffer = reponses.get(numQuestion-1); //On récupère la réponse correspondant au numero de la question à laquelle on est
+		System.out.println(buffer.getTable()); //Affiche la réponse du prof
 		System.out.println(table); //Affiche la réponse de l'élève
-		if (buffer.equals(table)) {
+		if (buffer.getTable().equals(table)) {
 			System.out.println("Bonne réponse");
 		} else {
 			System.out.println("Mauvaise réponse");
