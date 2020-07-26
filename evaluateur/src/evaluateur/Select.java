@@ -6,12 +6,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class Select extends Table {
+public class Select extends Table { //Créer une réponse à partir d'un SELECT
 
-	public Select(String requete, Connection connexion) {
+	public Select(String requete, String nomFichier, Connection connexion) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
+		super(requete, nomFichier);
 		try {
-			this.requete = requete;
 			Statement stmt = connexion.createStatement();
 			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
 			int nbCol = resultat.getMetaData().getColumnCount(); //Recupere nb colonne du resultat de la requete

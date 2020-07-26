@@ -6,13 +6,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class Modify extends Table {
+public class Modify extends Table { //Créer une réponse à partir d'une requete modifiante
 	
 	protected String tableSelect;
 	
-	public Modify(String requete, Connection connexion, String tabSelect) {
+	public Modify(String requete, String nomFichier, Connection connexion, String tabSelect) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
-		this.requete = requete;
+		super(requete, nomFichier);
 		try {
 			//Comme la requete est modifiante on modifie d'abord la table puis on remplace la requete par un select de la table pour voir ce qui a ete modifié
 			Statement stmtUpdate = connexion.createStatement();
