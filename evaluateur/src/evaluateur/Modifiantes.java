@@ -6,19 +6,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class Modify extends Table { //Créer une réponse à partir d'une requete modifiante
+public abstract class Modifiantes extends QueryResult { //Créer une réponse à partir d'une requete modifiante
 	
-	protected String tableSelect;
-	
-	public Modify(String requete, String nomFichier, Connection connexion, String tabSelect) {
+	public Modifiantes(String requete, String nomFichier, Connection connexion, String tabSelect) {
+		super(requete);
 		//TRANSFORMATION DU RESULTSET EN ARRAY
-		super(requete, nomFichier);
 		try {
 			//Comme la requete est modifiante on modifie d'abord la table puis on remplace la requete par un select de la table pour voir ce qui a ete modifié
 			Statement stmtUpdate = connexion.createStatement();
 			stmtUpdate.executeUpdate(requete);
 			stmtUpdate.close();
-			requete = "SELECT * FROM " + tableSelect;
+			requete = "SELECT * FROM " + tabSelect;
 			
 			//TRANSFORMATION DU RESULTSET EN ARRAY
 			Statement stmt = connexion.createStatement();

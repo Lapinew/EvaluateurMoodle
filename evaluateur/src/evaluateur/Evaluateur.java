@@ -26,94 +26,78 @@ public class Evaluateur {
 		String requete = "SELECT * FROM test WHERE age > 40";
 		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
 		String nomFichier = "createTable"  + ".sql";
+		Utility utilitaire = new Utility();
 		
 		//PHASE DE CONNEXION BD
 		Connexion connexion = new Connexion(sgbd);
 		Connection maConnexion = connexion.getConnection();
 		connexion.deleteBD(); //Pansement pour le probleme de destruction de bd en cas d'erreur au cours du programme
 		
-		Table objTable = null;
-		Table objTableReponse = null;
-		//RECUPERATION DE LA REPONSE DU PROF SI ELEVE
-		if (!enseignant) {
-			objTableReponse = objTable.getTableFromJSON(nomTest, numQuestion); //Il vaudrait mieux créer un constructeur qui créer un objet a partir d'un JSON
-			nomFichier = objTableReponse.getFichier();
-		}
+		Reponse reponseUser = null;
+		Reponse reponseProf = null;
 		
 		//CREATION DE LA BD TEST A PARTIR D'UN FICHIER .SQL
-		obj.stringToSQL(maConnexion, nomFichier);
+		utilitaire.executeSQLfile(maConnexion, nomFichier);
 		
 		//GENERATION DU RESULTAT DE LA REQUETE A TRAITER (voir le constructeur de la classe Table)
-		String [] splittedRequete = requete.split(" ", 4);
-		String typeRequete = splittedRequete[0].toUpperCase(); //On recupere le type de la requete
+		String [] splittedRequete = requete.split(" ", 4); //On récupère les premiers mots de la requete
+		String typeRequete = splittedRequete[0].toUpperCase(); //On recupere le type de la requete (1er mot)
 		String tableSelect = null; //Dans le cas d'une requete modifiante, on récupère la table qui est modifié pour faire un select ensuite
-		switch (typeRequete) {
-		  case "SELECT" :
-			  objTable = new Select(requete, nomFichier, maConnexion);
-		    break;
-		  case "UPDATE" :
-			  tableSelect = splittedRequete[1];
-			  objTable = new Modify(requete, nomFichier, maConnexion, tableSelect);
-		    break;
-		  case "DELETE" :
-			  tableSelect = splittedRequete[2];
-			  objTable = new Modify(requete, nomFichier, maConnexion, tableSelect);
-		    break;
-		  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois
-			  tableSelect = splittedRequete[2];
-			  objTable = new Modify(requete, nomFichier, maConnexion, tableSelect);
-		  default:
-			  System.out.println("Requete invalide : type de requete inconnue");
-			  System.exit(1);
-		}
-		  
-		  //TRAITEMENT DE LA TABLE RESULTAT 
-		  if (enseignant) { //PARTIE ENSEIGNANT
-		  objTable.toJSON(nomTest); 
-		  } 
-		  else { //PARTIE ELEVE
-		  objTable.comparaison(objTableReponse);
+		if (enseignant)  { //En tant qu'enseignant on veut juste enregistrer notre reponse dans un JSON
+			switch (typeRequete) { //On créer la réponse à partir de la requete
+			  case "SELECT" :
+				  reponseUser = new Select(requete, nomFichier, maConnexion);
+			    break;
+			  case "UPDATE" :
+				  tableSelect = splittedRequete[1];
+				  reponseUser = new Update(requete, nomFichier, maConnexion, tableSelect);
+			    break;
+			  case "DELETE" :
+				  tableSelect = splittedRequete[2];
+				  reponseUser = new Delete(requete, nomFichier, maConnexion, tableSelect);
+			    break;
+			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois
+				  tableSelect = splittedRequete[2];
+				  reponseUser = new Insert(requete, nomFichier, maConnexion, tableSelect);
+			  default:
+				  System.out.println("Requete invalide : type de requete inconnue");
+				  System.exit(1);
+			}
+			reponseUser.toJSON(nomTest); //On met la réponse dans le JSON
+		} else { //Si on est élève
+			//On récupère d'abord la réponse du prof
+			reponseProf = reponseProf.getReponseFromJSON(nomTest, numQuestion);
+			boolean queryResult = false; //Pour savoir si notre requete va avoir une table a comparer
+			switch (typeRequete) {
+			  case "SELECT" :
+				  queryResult = true;
+				  reponseUser = new Select(requete, ((QueryResult) reponseProf).getFichier(), maConnexion);
+			    break;
+			  case "UPDATE" :
+				  queryResult = true;
+				  tableSelect = splittedRequete[1];
+				  reponseUser = new Update(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
+			    break;
+			  case "DELETE" :
+				  queryResult = true;
+				  tableSelect = splittedRequete[2];
+				  reponseUser = new Delete(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
+			    break;
+			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois
+				  queryResult = true;
+				  tableSelect = splittedRequete[2];
+				  reponseUser = new Insert(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
+			  default:
+				  System.out.println("Requete invalide : type de requete inconnue");
+				  System.exit(1);
+			}
+			if (queryResult) {
+				((QueryResult) reponseUser).comparaisonTable((QueryResult) reponseProf);
+			}
+			reponseUser.compareSynthaxe(reponseProf.getRequete());
 		  }
 		  
-		  //SUPPRESSION DES TABLES POUR MYSQL
-		  //connexion.deleteBD();
-		  
 		  //System.out.println(System.getProperty("user.dir"));
-	}
-	
-	//Methode "libre" (elle ne concerne pas la classe directement)
-	private void stringToSQL(Connection maConnexion, String nomFichier) {
-		int c;
-		int back = 0;
-		int cpt = 0;
-		ArrayList<String> requetes = new ArrayList<String>();
-		requetes.add("");
-		try (FileReader in = new FileReader(nomFichier)) {
-			c = in.read();
-			while (c!=-1) { //Tant qu'il reste un character a lire dans le fichier
-				if (c == 59) { //Si ";"
-					System.out.println(requetes.get(cpt)); //J'affiche la requete que l'on vient de délimiter
-					Statement stmtUpdate = maConnexion.createStatement();
-					stmtUpdate.executeUpdate(requetes.get(cpt)); //On execute cette fameuse requete
-					requetes.add(""); //Je crée une place pour la requete qui suit dans le fichier
-					cpt++;
-				}
-				else if ((c == 32 && back == 32) || c == 10 || c == 13) { //Si double espace ou retour chariot linux/windows
-					//Ne rien faire
-				} else { //J'ajouter le character trouvé à la suite de la requete en train d'etre construite
-					String temp = requetes.get(cpt);
-					requetes.set(cpt, temp + Character.toString((char) c));
-				}
-				back = (char) c;
-				c = in.read();
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
 	}
 
 }

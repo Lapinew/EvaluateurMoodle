@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class Select extends Table { //Créer une réponse à partir d'un SELECT
+public class Select extends QueryResult { //Créer une réponse à partir d'un SELECT
 
 	public Select(String requete, String nomFichier, Connection connexion) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
-		super(requete, nomFichier);
+		super(requete);
 		try {
 			Statement stmt = connexion.createStatement();
 			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
@@ -32,5 +32,9 @@ public class Select extends Table { //Créer une réponse à partir d'un SELECT
 			System.out.println(e);
 	    	System.exit(1);
 		}
+	}
+	
+	public void compareSynthaxe(String requete) {
+		
 	}
 }
