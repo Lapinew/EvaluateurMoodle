@@ -8,6 +8,8 @@ public class Update extends Modifiantes {
 		super(requete, nomFichier, connexion, tabSelect);
 	}
 	
-	
+	public void compareSyntaxe(Reponse reponse) {
+		
+	}
 	
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public abstract class Modifiantes extends QueryResult { //Créer une réponse à partir d'une requete modifiante
 	
 	public Modifiantes(String requete, String nomFichier, Connection connexion, String tabSelect) {
-		super(requete);
+		super(requete, nomFichier);
 		//TRANSFORMATION DU RESULTSET EN ARRAY
 		try {
 			//Comme la requete est modifiante on modifie d'abord la table puis on remplace la requete par un select de la table pour voir ce qui a ete modifié
@@ -22,7 +22,7 @@ public abstract class Modifiantes extends QueryResult { //Créer une réponse à pa
 			Statement stmt = connexion.createStatement();
 			ResultSet resultat = stmt.executeQuery(requete); //Requete "FIXE"
 			int nbCol = resultat.getMetaData().getColumnCount(); //Recupere nb colonne du resultat de la requete
-			table = new ArrayList<ArrayList<Object>>();
+			resRequete = new ArrayList<ArrayList<Object>>();
 			
 			while(resultat.next()) {
 				//Une ligne doit pouvoir stocker différent types car une requete peut renvoyer plusieurs types de données (on utilise donc Object)
@@ -30,10 +30,10 @@ public abstract class Modifiantes extends QueryResult { //Créer une réponse à pa
 				for (int i = 1; i < nbCol; i++) { //Pour chaque colonne
 					ligne.add(resultat.getString(i)); //On ajoute à la ligne la valeur de la colonne
 				}
-				table.add(ligne);
+				resRequete.add(ligne);
 			}
 			stmt.close();
-			System.out.println("table crée");
+			System.out.println("Reponse crée");
 		}
 		catch (SQLException e) {
 			System.out.println(e);

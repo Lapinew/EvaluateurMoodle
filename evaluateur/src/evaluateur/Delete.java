@@ -8,4 +8,7 @@ public class Delete extends Modifiantes {
 		super(requete, nomFichier, connexion, tabSelect);
 	}
 	
+	public void compareSyntaxe(Reponse reponse) {
+		
+	}
 }
