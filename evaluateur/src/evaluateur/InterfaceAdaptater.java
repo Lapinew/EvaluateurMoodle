@@ -37,7 +37,7 @@ public class InterfaceAdaptater implements JsonSerializer<Reponse>, JsonDeserial
 
 	@Override
 	public JsonElement serialize(Reponse jsonElement, Type type, JsonSerializationContext jsonSerializationContext) {
-		System.out.println("prout");
+		System.out.println("serializer en cours d'execution");
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.add(CLASSNAME, new JsonPrimitive(jsonElement.getClass().getSimpleName()));
 		jsonObject.add(DATA, jsonSerializationContext.serialize(jsonElement));

@@ -10,14 +10,15 @@ public class Evaluateur {
 
 	public static void main(String[] args) throws SQLException {
 		
-		//TO-DO : Trouver pourquoi il récupère par tout les champs demandés lors de l'execution de la requete
+		//TO-DO : Trouver pourquoi il récupère pas tout les champs demandés lors de l'execution de la requete
 		//TO-DO : Fermer les connexion et les resultSet aux endroits nécéssaires
 		
 		//RECUPERATION DES DONNEES EXTERNES NECESSAIRES A L'EXECUTION DU PROGRAMME
-		int numQuestion = 1; //Pour l'eleve
+		int numQuestion = 3; //Pour l'eleve
 		boolean enseignant = false;
 		String sgbd = "mySQL";
-		String requete = "SELECT nom,prenom,age FROM test WHERE age > 40 AND prenom = 'Verse'";
+		String requete = "insert into test ( prenom , age ) values ('Kiroul', 68)";
+		//String requete = "UPDATE TEST SET AGE = 41 , nom=\"bob\",prenom='marley' WHERE age> 50 AND prenom = 'Kiroul'";
 		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
 		String nomFichier = "createTable"  + ".sql";
 		
@@ -32,15 +33,9 @@ public class Evaluateur {
 		Connection maConnexion = connexion.getConnection();
 		connexion.deleteBD(); //Pansement pour le probleme de destruction de bd en cas d'erreur au cours du programme
 		
-//		utilitaire.executeSQLfile(maConnexion, nomFichier);
-//		Reponse test = new Select(requete, nomFichier, maConnexion);
-//		System.out.println(test.getRequete());
-//		System.out.println(test.getStandard());
-//		System.exit(0);
-		
 		Reponse reponseUser = null;
 		Reponse reponseProf = null;
-		Select dummy = new Select("prout", "prout");
+		Select dummy = new Select("dummy", "dummy");
 		
 		//GENERATION DU RESULTAT DE LA REQUETE A TRAITER (voir le constructeur de la classe Table)
 		String [] splittedRequete = requete.split(" ", 4); //On récupère les premiers mots de la requete
@@ -63,6 +58,7 @@ public class Evaluateur {
 			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois
 				  tableSelect = splittedRequete[2];
 				  reponseUser = new Insert(requete, nomFichier, maConnexion, tableSelect);
+				  break;
 			  default:
 				  System.out.println("Requete invalide : type de requete inconnue");
 				  System.exit(1);
@@ -71,7 +67,6 @@ public class Evaluateur {
 		} else { //Si on est élève
 			//On récupère d'abord la réponse du prof
 			reponseProf = dummy.getReponseFromJSON(nomTest, numQuestion);
-			System.out.println(((Select) reponseProf).getFichier());
 			utilitaire.executeSQLfile(maConnexion, ((QueryResult) reponseProf).getFichier());
 			boolean queryResult = false; //Pour savoir si notre requete va avoir une table a comparer
 			switch (typeRequete) {
@@ -93,6 +88,7 @@ public class Evaluateur {
 				  queryResult = true;
 				  tableSelect = splittedRequete[2];
 				  reponseUser = new Insert(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
+				  break;
 			  default:
 				  System.out.println("Requete invalide : type de requete inconnue");
 				  System.exit(1);
@@ -102,7 +98,6 @@ public class Evaluateur {
 			}
 			reponseUser.compareSyntaxe(reponseProf);
 		  }
-		  
 		  //System.out.println(System.getProperty("user.dir"));
 	}
 

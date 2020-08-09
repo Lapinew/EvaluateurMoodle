@@ -12,28 +12,37 @@ public class Select extends QueryResult { //Créer une réponse à partir d'un SELE
 	private ArrayList<String> tables = new ArrayList<String>();
 	private ArrayList<String> conditions = new ArrayList<String>();
 	
-	public Select(String requete, String nomFichier) {
+	public Select(String requete, String nomFichier) { //Constructeur dummy
 		super(requete, nomFichier);
 	}
 
+	//TO-DO : améliorer l'anaylse du select (natural join, select dans select...)
+	
 	public Select(String requete, String nomFichier, Connection connexion) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY
 		super(requete, nomFichier);
 		//Standardisation de la requete
+		String standardised = "";
 		int currentChar;
-		for (int i = 0; i < requete.length(); i++) {
-			currentChar = requete.charAt(i);
-			if (currentChar == 59) {
+		int lastChar = 0;
+		for (int i = 0; i < this.requete.length(); i++) {
+			currentChar = this.requete.charAt(i);
+			if (i == this.requete.length()-1) {
 				standardised += " " + ((char) currentChar);
 			} else if (currentChar == 44) {
-				standardised += ((char) currentChar) + " ";
+				standardised += " ";
+				lastChar = 32;
+				continue;
+			} else if (currentChar == 32 && lastChar == 32) {
 			} else {
 				standardised += ((char) currentChar);
 			}
+			lastChar = currentChar;
 		}
-		standardised = standardised.toUpperCase();
+		this.cleanRequete = standardised.toUpperCase();
+		System.out.println("Standard : " + this.cleanRequete);
 		
-		String[] requeteSplit = this.standardised.split(" ");
+		String[] requeteSplit = this.cleanRequete.split(" ");
 		
 		//ancien getSelectItems(String[] requeteSplit, ArrayList<String> array);
 		int fromPos = 0; //Va permettre de récupérer la position du from dans la requete pour commencer a partir de cette position dans le methode suivante (optimisation nb calcul)
@@ -87,7 +96,6 @@ public class Select extends QueryResult { //Créer une réponse à partir d'un SELE
 				resRequete.add(ligne);
 			}
 			stmt.close();
-			System.out.println("Reponse crée");
 		}
 		catch (SQLException e) {
 			System.out.println(e);
@@ -146,7 +154,7 @@ public class Select extends QueryResult { //Créer une réponse à partir d'un SELE
 		if (sameItems) {
 			System.out.println("Vos tables sont identiques à ceux du prof");
 		}
-		//Comparaison des elements suivant WHERE
+		//Comparaison des conditions
 		System.out.println("Comparaison des elements suivant WHERE : ");
 		if (conditions.size()>((Select) reponse).getConditions().size()) {
 			System.out.println("Vous avez indiquez plus de conditions que nécéssaires");

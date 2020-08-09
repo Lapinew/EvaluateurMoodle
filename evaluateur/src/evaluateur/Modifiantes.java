@@ -8,8 +8,11 @@ import java.util.ArrayList;
 
 public abstract class Modifiantes extends QueryResult { //Créer une réponse à partir d'une requete modifiante
 	
+	protected String table;
+	
 	public Modifiantes(String requete, String nomFichier, Connection connexion, String tabSelect) {
 		super(requete, nomFichier);
+		this.table = tabSelect;
 		//TRANSFORMATION DU RESULTSET EN ARRAY
 		try {
 			//Comme la requete est modifiante on modifie d'abord la table puis on remplace la requete par un select de la table pour voir ce qui a ete modifié
@@ -39,6 +42,10 @@ public abstract class Modifiantes extends QueryResult { //Créer une réponse à pa
 			System.out.println(e);
 	    	System.exit(1);
 		}
+	}
+	
+	protected String getTable() {
+		return this.table;
 	}
 
 }

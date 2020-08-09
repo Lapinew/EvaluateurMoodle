@@ -21,7 +21,7 @@ public abstract class Reponse { //Cette classe permet de rassembler une requete 
 
 	//Attributs
 	protected String requete;
-	protected String standardised = "";
+	protected String cleanRequete; //Requete "standardisée"
 	
 	public Reponse(String requete) {
 		this.requete = requete;
@@ -30,10 +30,6 @@ public abstract class Reponse { //Cette classe permet de rassembler une requete 
 	//Methodes
 	public String getRequete () {
 		return requete;
-	}
-	
-	public String getStandard () {
-		return standardised;
 	}
 	
 	protected void aLaSuite(String nomTest) {

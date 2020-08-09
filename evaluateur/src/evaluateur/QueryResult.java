@@ -29,7 +29,7 @@ public abstract class QueryResult extends Reponse {
 		System.out.println(resRequete); //Affiche la réponse de l'élève
 		if (reponse2.getResRequete().equals(resRequete)) {
 			System.out.println("Votre résultat concorde avec celui de l'enseignant, différence de votre requete avec celle de l'enseignant :");
-			System.out.println(this.distanceLev(reponse2.getRequete().toUpperCase(), requete.toUpperCase())*100/reponse2.getRequete().length() + "% (Ce pourcentage peut comprendre des différences insignifiantes comme des espaces)");
+			//System.out.println(this.distanceLev(reponse2.getRequete().toUpperCase(), requete.toUpperCase())*100/reponse2.getRequete().length() + "% (Ce pourcentage peut comprendre des différences insignifiantes comme des espaces)");
 		} else {
 			System.out.println("Le résultat de votre requete diffère avec celui de l'enseignant");
 		}
