@@ -73,14 +73,19 @@ public abstract class Reponse { //Cette classe permet de rassembler une requete 
 	}
 	
 	protected void toJSON(String nomTest) {
-		File exist = new File(nomTest);
-		if (exist.length() == 0) { //Si le fichier ne contient pas de liste
-			System.out.println("Le fichier est vide, cette reponse va initialiser un nouvel Array");
-			this.premiereTable(nomTest);
-		} else { //Le fichier contient deja une liste
-			System.out.println("Le fichier contient deja un JSONArray, la table va etre ajoutée a la suite");
-			this.aLaSuite(nomTest);
-	    }
+		try {
+			File exist = new File(nomTest);
+			if (exist.createNewFile()) {
+				System.out.println("Le test n'existe pas, creation du json : " + nomTest);
+				this.premiereTable(nomTest);
+			} else { //Le fichier existe deja
+				System.out.println("Le fichier existe, la réponse va etre ajoutée a la suite");
+				this.aLaSuite(nomTest);
+			}
+		} catch (IOException e) {
+			System.out.println("Erreur lors de la creation du json");
+		    e.printStackTrace();
+		}
 	}
 	
 	protected int minimum(int n1, int n2, int n3) {

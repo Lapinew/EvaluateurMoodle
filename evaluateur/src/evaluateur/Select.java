@@ -16,7 +16,7 @@ public class Select extends QueryResult { //Créer une réponse à partir d'un SELE
 		super(requete, nomFichier);
 	}
 
-	//TO-DO : améliorer l'anaylse du select (natural join, select dans select...)
+	//TO-DO : améliorer l'analyse du select (natural join, select dans select...)
 	
 	public Select(String requete, String nomFichier, Connection connexion) {
 		//TRANSFORMATION DU RESULTSET EN ARRAY

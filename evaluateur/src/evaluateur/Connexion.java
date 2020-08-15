@@ -1,7 +1,6 @@
 package evaluateur;
 
 import java.sql.*;
-import java.util.ArrayList;
 
 public class Connexion { //Cette classe est configurée pour se connecter au BD locales
 	

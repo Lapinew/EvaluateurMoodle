@@ -14,13 +14,28 @@ public class Evaluateur {
 		//TO-DO : Fermer les connexion et les resultSet aux endroits nécéssaires
 		
 		//RECUPERATION DES DONNEES EXTERNES NECESSAIRES A L'EXECUTION DU PROGRAMME
-		int numQuestion = 3; //Pour l'eleve
+		
+		//int numQuestion = 3; //Pour l'eleve
+		//boolean enseignant = false;
+		//String sgbd = "mySQL";
+		//String requete = "insert into test ( prenom , age ) values ('Kiroul', 68)";
+		//String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
+		//String nomFichier = "createTable"  + ".sql";
+		
+		int numQuestion = 1; //Pour l'eleve
 		boolean enseignant = false;
-		String sgbd = "mySQL";
-		String requete = "insert into test ( prenom , age ) values ('Kiroul', 68)";
-		//String requete = "UPDATE TEST SET AGE = 41 , nom=\"bob\",prenom='marley' WHERE age> 50 AND prenom = 'Kiroul'";
-		String nomTest = "test" + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
-		String nomFichier = "createTable"  + ".sql";
+		if (args[3].toLowerCase().equals("false")) {
+			enseignant = false;
+		} else if (args[3].toLowerCase().equals("true")) {
+		} else {
+			System.out.println("erreur pour l'argument boolean");
+			System.exit(1);
+		}
+		String sgbd = args[1];
+		String requete = args[0];
+		String nomTest = args[2] + ".json"; //On pourrait rajouter un chemin en prefixe pour stocker les tests dans un endroit précis
+		String nomFichier = args[4]; //Pour l'enseignant
+		
 		
 		Utility utilitaire = new Utility(); //Fonctions "standalone"
 		
@@ -84,7 +99,7 @@ public class Evaluateur {
 				  tableSelect = splittedRequete[2];
 				  reponseUser = new Delete(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
 			    break;
-			  case "INSERT" : //A tweak car la "(" peut etre collé à la table je crois
+			  case "INSERT" :
 				  queryResult = true;
 				  tableSelect = splittedRequete[2];
 				  reponseUser = new Insert(requete, ((QueryResult) reponseProf).getFichier(), maConnexion, tableSelect);
